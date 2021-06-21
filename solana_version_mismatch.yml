@@ -1,0 +1,24 @@
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Get binary version
+      shell: "/root/.local/share/solana/install/active_release/bin/solana --version | cut -d \" \" -f 2"
+      register: bin_version
+    - set_fact:
+        bin_version: "{{ bin_version.stdout }}"
+
+    - name: Get api version
+      shell: " curl -sS http://localhost:8899 -X POST -H \"Content-Type: application/json\" -d ' {\"jsonrpc\":\"2.0\",\"id\":1, \"method\":\"getVersion\"} ' | jq -r '.result.\"solana-core\" ' "
+      register: api_version
+    - set_fact:
+        api_version: "{{ api_version.stdout }}"
+
+    - name: Version Mismatch
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} VERSION MISMATCH"
+      when: bin_version != api_version
+
+    - name: Print the gateway for each host when defined
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: BIN {{ bin_version }} | API {{ api_version }}"
+
