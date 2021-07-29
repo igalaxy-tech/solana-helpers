@@ -23,8 +23,8 @@ rm -r /root/.local/share/solana
 rm /root/nodemon.sh
 rm /root/slotBehind.py
 rm /root/zabbix-release*
-rm /etc/zabbix
-rm /var/log/zabbix
+rm -r /etc/zabbix
+rm -r /var/log/zabbix
 systemctl stop zabbix 
 systemctl disable zabbix 
 apt-get --purge remove -y zabbix-*
