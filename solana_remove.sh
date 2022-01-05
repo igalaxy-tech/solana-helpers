@@ -25,6 +25,6 @@ rm /root/slotBehind.py
 rm /root/zabbix-release*
 rm -r /etc/zabbix
 rm -r /var/log/zabbix
-systemctl stop zabbix 
-systemctl disable zabbix 
+systemctl stop zabbix-agent 
+systemctl disable zabbix-agent
 apt-get --purge remove -y zabbix-*
