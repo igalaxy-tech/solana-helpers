@@ -1,0 +1,126 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Stop solana service
+    ansible.builtin.systemd:
+      state: stopped
+      name: solana
+
+#  - name: Update solana
+#    shell: /root/.local/share/solana/install/active_release/bin/solana-install-init v1.9.1
+
+  - name: Clear ledger
+    ansible.builtin.file:
+      path: /ledger
+      state: absent
+
+#  - name: Replace supermajority
+#    replace:
+#      path: /root/solana/solana.service
+#      regexp: '^(.*)--wait-for-supermajority(.*)\\'
+#      replace: '--wait-for-supermajority 153139220 \\'
+
+  - name: Replace shred
+    replace:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--expected-shred-version(.*)\\'
+      replace: '--expected-shred-version 11762 \\'
+
+#  - name: Replace bank hash
+#    replace:
+#      path: /root/solana/solana.service
+#      regexp: '^(.*)--expected-bank-hash(.*)\\'
+#      replace: '--expected-bank-hash 4kL82HMacFEPTpvwBhNpFTmw2GeSCvvDn3xPi7Whdntc \\'
+
+  - name: Insert sm
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--wait-for-supermajority 153139220 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+
+  - name: Insert bank hash
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--expected-bank-hash 4kL82HMacFEPTpvwBhNpFTmw2GeSCvvDn3xPi7Whdntc \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Remove no snap fetch
+    lineinfile:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--no-snapshot-fetch(.*)\\'
+      state: absent
+
+  - name: Remove known validators
+    lineinfile:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--known-validator(.*)\\' 
+      state: absent
+
+  - name: Remove trusted validators
+    lineinfile:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--trusted-validator(.*)\\' 
+      state: absent
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator PUmpKiNnSVAZ3w4KaFX6jKSjXUNHFShGkXbERo54xjb \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator Ninja1spj6n9t5hVYgF3PdnYz2PLnkt7rvaw3firmjs \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator CXPeim1wQMkcTvEHx9QdhgKREYYJD8bnaCCqPRwJ1to1 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator A4hyMd3FyvUJSRafDUSwtLLaQcxRP4r1BRC9w2AJ1to2 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator 23U4mgK9DMCxsv2StC4y2qAptP25Xv5b2cybKCeJ1to3 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator Ei8VLKR3chZAhJzWwj8PopeuedpQiths2ovVCQ2BCvK7 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator DiGifdKABxzru2KsjN3YkZZmWP9mVMYK8HWadjtPtJit \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator 9FXD1NXrK6xFU8i4gLAgjj2iMEWTqJhSuQN8tQuDfm2e \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+
+  - name: Daemon-reload
+    ansible.builtin.systemd:
+      daemon_reload: yes
+
+  - name: Start solana service
+    ansible.builtin.systemd:
+      state: started
+      name: solana
+
+
+

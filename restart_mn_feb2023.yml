@@ -1,0 +1,67 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Stop solana service
+    ansible.builtin.service:
+      state: stopped
+      name: solana
+
+  - name: Remove validators, shred, expected-bank-hash, supermajority
+    lineinfile:
+      path: /root/solana/solana.service
+      regexp: '{{item.reg}}'
+      state: absent
+    with_items:
+    - { reg: '^(.*)--no-snapshot-fetch.*\\' }
+    - { reg: '^(.*)--known-validator.*\\' }
+    - { reg: '^(.*)--expected-bank-hash.*\\' }
+    - { reg: '^(.*)--expected-shred-version.*\\' }
+    - { reg: '^(.*)--wait-for-supermajority.*\\' }
+    - { reg: '^(.*)--expected-genesis-hash.*\\' }
+    
+  - name: Add validators, supermajority, shred, bank-hash ..
+    lineinfile:
+      path: /root/solana/solana.service
+      insertafter: 'ExecStart=/root/.local/share/solana/install/active_release/bin/solana-validator \\'
+      line: '{{item.ln}}'
+    with_items:
+    - { ln: '--known-validator DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ \' }
+    - { ln: '--known-validator GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ \' }
+    - { ln: '--known-validator CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S \' }
+    - { ln: '--known-validator C1ocKDYMCm2ooWptMMnpd5VEB2Nx4UMJgRuYofysyzcA \' }
+    - { ln: '--known-validator GwHH8ciFhR8vejWCqmg8FWZUCNtubPY2esALvy5tBvji \' }
+    - { ln: '--known-validator 6WgdYhhGE53WrZ7ywJA15hBVkw7CRbQ8yDBBTwmBtAHN \' }
+    - { ln: '--known-validator 7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2 \' }
+    - { ln: '--wait-for-supermajority 179526403 \' }
+    - { ln: '--expected-shred-version 56177 \' }
+    - { ln: '--expected-bank-hash 69p75jzzT1P2vJwVn3wbTVutxHDcWKAgcbjqXvwCVUDE \' }
+
+ 
+  - name: Remove /ledger
+    file:
+      state: absent
+      path: /ledger
+
+  - name: Create /ledger
+    ansible.builtin.file:
+      path: /ledger
+      state: directory
+      mode: '0755'
+
+  - name: Remove accounts
+    file:
+      state: absent
+      path: /mnt/ramdisk/accounts
+
+#  - name: Download snapshot
+#    get_url: url=https://d1fe19ei6b1nmi.cloudfront.net/snapshot-179526403-FUdrVxEUnbp4AzZ5qNPgYB3viRQEGo2n1xq5n382Y8sC.tar.zst dest=/ledger/snapshot-179526403-FUdrVxEUnbp4AzZ5qNPgYB3viRQEGo2n1xq5n382Y8sC.tar.zst
+
+  - name: Daemon-reload
+    ansible.builtin.systemd:
+      daemon_reload: yes
+
+  - name: Start solana service
+    ansible.builtin.systemd:
+      state: started
+      name: solana

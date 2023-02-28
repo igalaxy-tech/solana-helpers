@@ -1,0 +1,128 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Stop updater
+    ansible.builtin.systemd:
+      state: stopped
+      name: update_solana.service
+
+  - name: Stop solana service
+    ansible.builtin.systemd:
+      state: stopped
+      name: solana
+
+  - name: Update solana
+    shell: /root/.local/share/solana/install/active_release/bin/solana-install-init v1.10.11
+
+  - name: Clear ledger
+    ansible.builtin.file:
+      path: /root/solana/ledger
+      state: absent
+
+  - name: Replace supermajority
+    replace:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--wait-for-supermajority(.*)\\'
+      replace: '--wait-for-supermajority 130461975 \\'
+
+  - name: Replace shred
+    replace:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--expected-shred-version(.*)\\'
+      replace: '--expected-shred-version 33548 \\'
+
+  - name: Replace bank hash
+    replace:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--expected-bank-hash(.*)\\'
+      replace: '--expected-bank-hash EpPRJFjY11rds94kDoivi86sEW3sUiSLbSaSZdRqRsBz \\'
+
+  - name: Remove no snap fetch
+    lineinfile:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--no-snapshot-fetch(.*)\\'
+      state: absent
+
+  - name: Remove entrypoints
+    lineinfile:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--entrypoint(.*)\\'
+      state: absent
+
+  - name: Remove known validators
+    lineinfile:
+      path: /root/solana/solana.service
+      regexp: '^(.*)--known-validator(.*)\\' 
+      state: absent
+
+  - name: Insert entrypoint
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--entrypoint 5.9.35.85:8001 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert entrypoint
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--entrypoint entrypoint.testnet.solana.com:8001 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert entrypoint
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--entrypoint entrypoint2.testnet.solana.com:8001 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert entrypoint
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--entrypoint entrypoint3.testnet.solana.com:8001 \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator eoKpUABi59aT4rR9HGS3LcMecfut9x7zJyodWWP43YQ \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator 82k4RGZAJxtXvW3hzgmHB2q4oDHzgwMR2cGXup324gsJ \'
+      insertafter: '^(.*)xecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator Bszp6hDL19ymPZ8efp9venQYb4ae2rRmEtVp4aG6k8nx \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator 376e8QLx9qSkjFn7mK2kp3wBwvziKuMqiB3iAbK5Payx \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Insert known validator
+    lineinfile:
+      path: /root/solana/solana.service
+      line: '--known-validator 8Apz17FY7vts5PUEP28apzqQBVgg6McbetFJqb45ew8F \'
+      insertafter: '^(.*)ExecStart=(.*)\\'
+
+  - name: Daemon-reload
+    ansible.builtin.systemd:
+      daemon_reload: yes
+
+
+  - name: Start updater
+    ansible.builtin.systemd:
+      state: started
+      name: update_solana.service
+
+  - name: Start solana service
+    ansible.builtin.systemd:
+      state: started
+      name: solana
